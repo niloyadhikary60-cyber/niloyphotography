@@ -42,7 +42,7 @@
 }
 
 #upload {
-    display: none; /* removed upload panel */
+    display: none;
 }
 </style>
 
@@ -92,44 +92,31 @@
 
 <script>
 
-/* 🔥 CLOUDINARY AUTO LOAD SYSTEM */
-const cloudName = "duwprr4et";
-const folder = "niloy";
+/* 🔥 LOCAL / GITHUB IMAGE SYSTEM */
+let images = [
+    "images/P1.jpg",
+    "images/P2.jpg",
+    "images/P3.jpg",
+"images/M7.jpg",
+"images/M6.jpg",
+"images/M5.jpg",
+"images/M4.jpg",
+"images/M3.jpg",
+    "images/M1.jpg",
+    "images/M2.jpg"
+];
 
-let images = [];
+/* LOAD IMAGES */
+const gallery = document.getElementById("gallery");
 
-async function loadImages() {
-    const url = `https://res.cloudinary.com/${cloudName}/image/list/${folder}.json`;
+images.forEach((url, index) => {
+    let div = document.createElement("div");
+    div.className = "photo";
 
-    try {
-        const res = await fetch(url);
-        const data = await res.json();
+    div.innerHTML = `<img src="${url}" onclick="openImage(${index})">`;
 
-        const gallery = document.getElementById("gallery");
-        gallery.innerHTML = "";
-
-        images = [];
-
-        data.resources.forEach((item, index) => {
-
-            const imgUrl = `https://res.cloudinary.com/${cloudName}/image/upload/${item.public_id}.jpg`;
-
-            images.push(imgUrl);
-
-            let div = document.createElement("div");
-            div.className = "photo";
-
-            div.innerHTML = `<img src="${imgUrl}" onclick="openImage(${index})">`;
-
-            gallery.appendChild(div);
-        });
-
-    } catch (err) {
-        console.error("Error loading images", err);
-    }
-}
-
-loadImages();
+    gallery.appendChild(div);
+});
 
 /* FILTER */
 function filterImages(category) {
@@ -150,7 +137,6 @@ let tx = 0, ty = 0;
 let isDragging = false;
 let startX = 0;
 let startY = 0;
-let dragged = false;
 
 const img = document.getElementById("viewer-img");
 const viewer = document.getElementById("viewer");
