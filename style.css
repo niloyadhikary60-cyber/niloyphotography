@@ -223,3 +223,61 @@ section {
         column-count: 1;
     }
 }
+/* 🔥 ADMIN PANEL UPGRADE */
+
+/* Bigger, glowing heading */
+.admin-panel h3 {
+    font-size: 22px;
+    margin-bottom: 15px;
+    letter-spacing: 1px;
+    text-shadow: 0 0 10px #ff4d00, 0 0 20px #ff0066;
+}
+
+/* Bigger inputs */
+.admin-panel input,
+.admin-panel select {
+    font-size: 16px;
+    padding: 12px;
+}
+
+/* Glow focus */
+.admin-panel input:focus,
+.admin-panel select:focus {
+    outline: none;
+    box-shadow: 0 0 10px #ff4d00, 0 0 20px #ff0066;
+}
+
+/* Bigger glowing buttons */
+.admin-panel button {
+    font-size: 16px;
+    padding: 12px;
+    margin-top: 10px;
+
+    background: linear-gradient(45deg, #ff4d00, #ff0066);
+    border: none;
+    border-radius: 8px;
+    color: white;
+
+    cursor: pointer;
+
+    box-shadow: 0 0 10px rgba(255,77,0,0.6);
+    transition: 0.3s;
+}
+
+/* Hover glow effect */
+.admin-panel button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px #ff4d00, 0 0 40px #ff0066;
+}
+
+/* Panel glow */
+.admin-panel {
+    box-shadow:
+        0 0 20px rgba(255,77,0,0.4),
+        0 0 40px rgba(255,0,120,0.2);
+}
+
+/* Password text bigger */
+#password {
+    font-size: 16px;
+}

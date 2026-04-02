@@ -25,32 +25,58 @@
     -webkit-user-drag: none;
 }
 
-.filters {
-    margin-bottom: 20px;
-}
-.filters button {
-    margin: 5px;
-    padding: 8px 15px;
-    border: none;
-    background: #222;
+/* ADMIN UI */
+.admin-menu {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    font-size: 24px;
+    cursor: pointer;
     color: white;
-    border-radius: 20px;
+}
+
+.admin-overlay {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    backdrop-filter: blur(10px);
+    display: none;
+    z-index: 999;
+}
+
+.admin-panel {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    background: #111;
+    padding: 20px;
+    border-radius: 10px;
+    z-index: 1000;
+    color: white;
+}
+
+.delete-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    display: none;
+    background: red;
+    color: white;
+    border: none;
     cursor: pointer;
 }
-.filters button:hover {
-    background: #ff4d00;
-}
-
-#upload {
-    display: none;
-}
+.photo { position: relative; }
 </style>
-
 </head>
 
 <body>
 
+<div class="admin-overlay" onclick="logout()"></div>
+
 <section class="hero">
+    <div class="admin-menu" onclick="openLogin()">⋮</div>
     <h1>Niloy Photography</h1>
     <p>Portrait | Street | Stories</p>
 </section>
@@ -62,12 +88,10 @@
         <button onclick="filterImages('all')">All</button>
         <button onclick="filterImages('portrait')">Portrait</button>
         <button onclick="filterImages('pet')">Pet</button>
-        <button onclick="filterImages('Others')">Others</button>
+        <button onclick="filterImages('others')">Others</button>
     </div>
 
-    <!-- AUTO GALLERY -->
     <div class="grid" id="gallery"></div>
-
 </section>
 
 <section id="about">
@@ -77,12 +101,34 @@
 
 <section id="contact">
     <h2>Contact</h2>
-    <p>Email:</p>
     <a href="mailto:niloyadhikary60@gmail.com">niloyadhikary60@gmail.com</a>
-    <br><br>
-    <a href="https://instagram.com/niloy.adhikary.900" target="_blank">Instagram</a>
 </section>
 
+<!-- LOGIN -->
+<div class="admin-panel" id="loginBox">
+    <h3>Admin Login</h3>
+    <input type="password" id="password" placeholder="Password">
+    <button onclick="login()">Login</button>
+</div>
+
+<!-- ADMIN PANEL -->
+<div class="admin-panel" id="adminPanel">
+    <h3>Upload Photo</h3>
+
+    <!-- FILE UPLOAD -->
+    <input type="file" id="fileInput" accept="image/*">
+
+    <select id="imgCategory">
+        <option value="portrait">Portrait</option>
+        <option value="pet">Pet</option>
+        <option value="others">Others</option>
+    </select>
+
+    <button onclick="addImage()">Upload</button>
+    <button onclick="logout()">Logout</button>
+</div>
+
+<!-- VIEWER (UNCHANGED) -->
 <div id="viewer">
     <span id="close" onclick="closeImage()">✕</span>
     <span id="prev" class="nav-btn" onclick="prevImage()">❮</span>
@@ -92,44 +138,123 @@
 
 <script>
 
-/* 🔥 LOCAL / GITHUB IMAGE SYSTEM */
+/* ADMIN */
+const ADMIN_PASS = "1234";
+let isAdmin = false;
+
+/* IMAGE DATA */
 let images = [
-    "images/P1.jpg",
-    "images/P2.jpg",
-    "images/P3.jpg",
-"images/M7.jpg",
-"images/M6.jpg",
-"images/M5.jpg",
-"images/M4.jpg",
-"images/M3.jpg",
-    "images/M1.jpg",
-    "images/M2.jpg"
+    {url:"images/P3.jpg", category:"portrait"},
+    {url:"images/P2.jpg", category:"portrait"},
+    {url:"images/M7.jpg", category:"pet"},
+    {url:"images/M6.jpg", category:"pet"},
+    {url:"images/M5.jpg", category:"pet"},
+    {url:"images/M4.jpg", category:"pet"},
+    {url:"images/M3.jpg", category:"pet"},
+    {url:"images/M1.jpg", category:"pet"},
+    {url:"images/M2.jpg", category:"pet"}
 ];
 
-/* LOAD IMAGES */
 const gallery = document.getElementById("gallery");
 
-images.forEach((url, index) => {
-    let div = document.createElement("div");
-    div.className = "photo";
+/* LOAD */
+function loadGallery(){
+    gallery.innerHTML = "";
 
-    div.innerHTML = `<img src="${url}" onclick="openImage(${index})">`;
+    images.forEach((imgData, index) => {
+        let div = document.createElement("div");
+        div.className = "photo";
+        div.setAttribute("data-category", imgData.category);
 
-    gallery.appendChild(div);
-});
+        div.innerHTML = `
+            <img src="${imgData.url}" onclick="openImage(${index})">
+            <button class="delete-btn" onclick="deleteImage(${index})">✕</button>
+        `;
 
-/* FILTER */
+        gallery.appendChild(div);
+    });
+
+    updateAdminUI();
+}
+loadGallery();
+
+/* FILTER (UNCHANGED) */
 function filterImages(category) {
     const photos = document.querySelectorAll(".photo");
 
     photos.forEach(photo => {
-        if (category === "all") {
-            photo.style.display = "block";
-        }
+        const c = photo.getAttribute("data-category");
+        photo.style.display = (category === "all" || c === category) ? "block" : "none";
     });
 }
 
-/* VIEWER SYSTEM */
+/* LOGIN */
+function openLogin(){
+    document.querySelector(".admin-overlay").style.display = "block";
+    document.getElementById("loginBox").style.display = "block";
+}
+
+function login(){
+    if(document.getElementById("password").value === ADMIN_PASS){
+        isAdmin = true;
+        document.getElementById("loginBox").style.display = "none";
+        document.getElementById("adminPanel").style.display = "block";
+        updateAdminUI();
+    } else alert("Wrong password");
+}
+
+function logout(){
+    isAdmin = false;
+    document.querySelector(".admin-overlay").style.display = "none";
+    document.getElementById("adminPanel").style.display = "none";
+    document.getElementById("loginBox").style.display = "none";
+    updateAdminUI();
+}
+
+/* 🔥 GITHUB UPLOAD (UPDATED) */
+async function addImage(){
+    const file = document.getElementById("fileInput").files[0];
+    const category = document.getElementById("imgCategory").value;
+
+    if(!file){
+        alert("Select image");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("image", file);
+
+    const res = await fetch("http://localhost:3000/upload", {
+        method: "POST",
+        body: formData
+    });
+
+    const data = await res.json();
+
+    images.push({
+        url: data.url,
+        category: category
+    });
+
+    loadGallery();
+}
+
+/* DELETE (frontend only) */
+function deleteImage(index){
+    images.splice(index,1);
+    loadGallery();
+}
+
+function updateAdminUI(){
+    document.querySelectorAll(".delete-btn").forEach(btn=>{
+        btn.style.display = isAdmin ? "block" : "none";
+    });
+}
+
+/* ========================= */
+/* VIEWER SYSTEM (UNCHANGED) */
+/* ========================= */
+
 let current = 0;
 let scale = 1;
 let tx = 0, ty = 0;
@@ -143,7 +268,7 @@ const viewer = document.getElementById("viewer");
 
 function openImage(i){
     current = i;
-    img.src = images[i];
+    img.src = images[i].url;
     viewer.classList.add("active");
 
     scale = 1;
