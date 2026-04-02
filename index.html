@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Niloy Photography</title>
+<link rel="stylesheet" href="style.css">
+
+<style>
+#viewer {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+#viewer.active {
+    display: flex !important;
+    opacity: 1;
+}
+#viewer img {
+    max-width: 90vw;
+    max-height: 90vh;
+    object-fit: contain;
+    transition: none !important;
+    cursor: grab;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+.filters {
+    margin-bottom: 20px;
+}
+.filters button {
+    margin: 5px;
+    padding: 8px 15px;
+    border: none;
+    background: #222;
+    color: white;
+    border-radius: 20px;
+    cursor: pointer;
+}
+.filters button:hover {
+    background: #ff4d00;
+}
+
+#upload {
+    display: none; /* removed upload panel */
+}
+</style>
+
+</head>
+
+<body>
+
+<section class="hero">
+    <h1>Niloy Photography</h1>
+    <p>Portrait | Street | Stories</p>
+</section>
+
+<section id="portfolio">
+    <h2>My Work</h2>
+
+    <div class="filters">
+        <button onclick="filterImages('all')">All</button>
+        <button onclick="filterImages('portrait')">Portrait</button>
+        <button onclick="filterImages('pet')">Pet</button>
+        <button onclick="filterImages('Others')">Others</button>
+    </div>
+
+    <!-- AUTO GALLERY -->
+    <div class="grid" id="gallery"></div>
+
+</section>
+
+<section id="about">
+    <h2>About Me</h2>
+    <p>Photography, for me, is more than just taking pictures—it’s about freezing emotions in time...</p>
+</section>
+
+<section id="contact">
+    <h2>Contact</h2>
+    <p>Email:</p>
+    <a href="mailto:niloyadhikary60@gmail.com">niloyadhikary60@gmail.com</a>
+    <br><br>
+    <a href="https://instagram.com/niloy.adhikary.900" target="_blank">Instagram</a>
+</section>
+
+<div id="viewer">
+    <span id="close" onclick="closeImage()">✕</span>
+    <span id="prev" class="nav-btn" onclick="prevImage()">❮</span>
+    <img id="viewer-img">
+    <span id="next" class="nav-btn" onclick="nextImage()">❯</span>
+</div>
+
+<script>
+
+/* 🔥 CLOUDINARY AUTO LOAD SYSTEM */
+const cloudName = "duwprr4et";
+const folder = "niloy";
+
+let images = [];
+
+async function loadImages() {
+    const url = `https://res.cloudinary.com/${cloudName}/image/list/${folder}.json`;
+
+    try {
+        const res = await fetch(url);
+        const data = await res.json();
+
+        const gallery = document.getElementById("gallery");
+        gallery.innerHTML = "";
+
+        images = [];
+
+        data.resources.forEach((item, index) => {
+
+            const imgUrl = `https://res.cloudinary.com/${cloudName}/image/upload/${item.public_id}.jpg`;
+
+            images.push(imgUrl);
+
+            let div = document.createElement("div");
+            div.className = "photo";
+
+            div.innerHTML = `<img src="${imgUrl}" onclick="openImage(${index})">`;
+
+            gallery.appendChild(div);
+        });
+
+    } catch (err) {
+        console.error("Error loading images", err);
+    }
+}
+
+loadImages();
+
+/* FILTER */
+function filterImages(category) {
+    const photos = document.querySelectorAll(".photo");
+
+    photos.forEach(photo => {
+        if (category === "all") {
+            photo.style.display = "block";
+        }
+    });
+}
+
+/* VIEWER SYSTEM */
+let current = 0;
+let scale = 1;
+let tx = 0, ty = 0;
+
+let isDragging = false;
+let startX = 0;
+let startY = 0;
+let dragged = false;
+
+const img = document.getElementById("viewer-img");
+const viewer = document.getElementById("viewer");
+
+function openImage(i){
+    current = i;
+    img.src = images[i];
+    viewer.classList.add("active");
+
+    scale = 1;
+    tx = 0;
+    ty = 0;
+    applyTransform();
+}
+
+function closeImage(){
+    viewer.classList.remove("active");
+}
+
+function nextImage(){
+    current = (current + 1) % images.length;
+    openImage(current);
+}
+function prevImage(){
+    current = (current - 1 + images.length) % images.length;
+    openImage(current);
+}
+
+function applyTransform(){
+    const rect = img.getBoundingClientRect();
+
+    const maxX = Math.max(0, (rect.width * scale - window.innerWidth) / 2);
+    const maxY = Math.max(0, (rect.height * scale - window.innerHeight) / 2);
+
+    tx = Math.min(maxX, Math.max(-maxX, tx));
+    ty = Math.min(maxY, Math.max(-maxY, ty));
+
+    img.style.transform = `translate(${tx}px, ${ty}px) scale(${scale})`;
+}
+
+img.addEventListener("wheel", (e) => {
+    e.preventDefault();
+
+    if (e.deltaY < 0) scale += 0.1;
+    else scale -= 0.1;
+
+    scale = Math.max(1, Math.min(scale, 8));
+
+    if (scale === 1) {
+        tx = 0;
+        ty = 0;
+    }
+
+    applyTransform();
+});
+
+img.addEventListener("mousedown", (e) => {
+    if (scale <= 1) return;
+
+    isDragging = true;
+    startX = e.clientX;
+    startY = e.clientY;
+});
+
+document.addEventListener("mousemove", (e) => {
+    if (!isDragging) return;
+
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+
+    startX = e.clientX;
+    startY = e.clientY;
+
+    tx += dx;
+    ty += dy;
+
+    applyTransform();
+});
+
+document.addEventListener("mouseup", () => {
+    isDragging = false;
+});
+
+viewer.addEventListener("click", (e) => {
+    if (e.target === viewer) closeImage();
+});
+
+document.addEventListener("keydown", (e) => {
+    if (!viewer.classList.contains("active")) return;
+
+    if (e.key === "ArrowRight") nextImage();
+    if (e.key === "ArrowLeft") prevImage();
+    if (e.key === "Escape") closeImage();
+});
+
+</script>
+
+</body>
+</html>

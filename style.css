@@ -1,0 +1,225 @@
+/* Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial;
+}
+
+/* Smooth scroll */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Background */
+body {
+    background: #000;
+    color: white;
+    overflow-x: hidden;
+}
+
+/* Lightning veins */
+body::before {
+    content: "";
+    position: fixed;
+    width: 200%;
+    height: 200%;
+    background:
+        repeating-linear-gradient(120deg, transparent 0, transparent 80px, rgba(255,80,0,0.1) 82px),
+        repeating-linear-gradient(-60deg, transparent 0, transparent 100px, rgba(255,0,120,0.08) 102px);
+    animation: move 12s linear infinite;
+    opacity: 0.4;
+    pointer-events: none;
+}
+
+@keyframes move {
+    100% { transform: translate(-200px, -200px); }
+}
+
+/* Loader */
+
+/* Hero */
+.hero {
+    height: 90vh;
+    background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.8)),
+                url("images/cover.jpg") center/cover;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Sections */
+section {
+    padding: 60px 20px;
+    text-align: center;
+}
+
+/* Grid */
+.grid {
+    column-count: 3;
+    column-gap: 15px;
+}
+
+.photo {
+    position: relative;
+    margin-bottom: 15px;
+}
+
+.photo img {
+    width: 100%;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform 0.3s;
+}
+
+.photo img:hover {
+    transform: scale(1.03);
+}
+
+/* Overlay */
+.overlay {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    padding: 10px;
+    background: rgba(0,0,0,0.6);
+    display: flex;
+    justify-content: space-between;
+    opacity: 0;
+    transition: 0.3s;
+}
+
+.photo:hover .overlay {
+    opacity: 1;
+}
+
+/* Like button */
+.overlay button {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+}
+
+/* Viewer */
+#viewer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+
+    backdrop-filter: blur(15px);
+    background: rgba(0,0,0,0.85);
+
+    display: none;
+    justify-content: center;
+    align-items: center;
+
+    padding: 40px;
+
+    z-index: 9999;
+}
+
+/* Viewer image */
+#viewer img {
+    max-width: 90vw;
+    max-height: 90vh;
+    object-fit: contain;
+
+    transition: none !important; /* no drag lag */
+
+    cursor: grab;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+/* Close button */
+#close {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    font-size: 30px;
+    cursor: pointer;
+}
+
+/* Navigation buttons */
+.nav-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 40px;
+    color: white;
+    background: rgba(0,0,0,0.5);
+    padding: 10px 15px;
+    cursor: pointer;
+    user-select: none;
+    border-radius: 10px;
+}
+
+#prev { left: 20px; }
+#next { right: 20px; }
+
+/* Filters */
+.filters {
+    margin-bottom: 20px;
+}
+
+.filters button {
+    margin: 5px;
+    padding: 8px 15px;
+    border: none;
+    background: #222;
+    color: white;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.filters button:hover {
+    background: #ff4d00;
+}
+
+/* Upload Panel */
+#upload {
+    background: #111;
+    padding: 20px;
+    margin: 20px;
+    border-radius: 10px;
+}
+
+#upload input,
+#upload select,
+#upload button {
+    margin: 5px;
+    padding: 8px;
+    border-radius: 5px;
+    border: none;
+}
+
+#upload button {
+    background: #ff4d00;
+    color: white;
+    cursor: pointer;
+}
+
+/* About & Contact */
+#about, #contact {
+    background: #111;
+    margin: 20px;
+    border-radius: 10px;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    .grid {
+        column-count: 2;
+    }
+}
+
+@media (max-width: 500px) {
+    .grid {
+        column-count: 1;
+    }
+}
